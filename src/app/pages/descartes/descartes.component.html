@@ -1,0 +1,480 @@
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="mb-1">Descartes eletrônicos</h2>
+    <p class="text-muted mb-0">
+      Registre e acompanhe o descarte de equipamentos eletrônicos.
+    </p>
+  </div>
+
+  <button class="btn btn-success"
+          (click)="abrirCadastro(formModal)"
+          [disabled]="carregandoAuxiliares || categorias.length === 0
+            || pontos.length === 0 || responsaveis.length === 0">
+    <i class="bi bi-plus-lg me-2"></i>
+    Novo descarte
+  </button>
+</div>
+
+<div *ngIf="mensagem" class="alert alert-success alert-dismissible">
+  <i class="bi bi-check-circle me-2"></i>
+  {{ mensagem }}
+  <button type="button" class="btn-close"
+          (click)="mensagem = ''"></button>
+</div>
+
+<div *ngIf="erroAuxiliares" class="alert alert-warning">
+  <i class="bi bi-exclamation-triangle me-2"></i>
+  {{ erroAuxiliares }}
+  <button class="btn btn-sm btn-outline-warning ms-2"
+          (click)="carregarAuxiliares()">
+    Recarregar cadastros
+  </button>
+</div>
+
+<div *ngIf="!carregandoAuxiliares &&
+            (categorias.length === 0 || pontos.length === 0 ||
+             responsaveis.length === 0) && !erroAuxiliares"
+     class="alert alert-warning">
+  Para cadastrar descartes, é necessário ter pelo menos uma categoria,
+  um ponto de coleta e um responsável cadastrados.
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+
+    <div class="row align-items-end mb-4">
+      <div class="col-md-7">
+        <label for="pesquisaDescarte" class="form-label">
+          Pesquisar descartes
+        </label>
+
+        <div class="input-group">
+          <span class="input-group-text">
+            <i class="bi bi-search"></i>
+          </span>
+          <input
+            id="pesquisaDescarte"
+            type="search"
+            class="form-control"
+            [(ngModel)]="pesquisa"
+            placeholder="Equipamento, categoria, ponto ou responsável..."
+          />
+        </div>
+      </div>
+
+      <div class="col-md-5 text-md-end mt-3">
+        <span class="text-muted">
+          {{ descartesFiltrados.length }} registro(s)
+        </span>
+      </div>
+    </div>
+
+    <div *ngIf="erro && !carregando" class="alert alert-danger">
+      {{ erro }}
+      <button class="btn btn-sm btn-outline-danger ms-2"
+              (click)="listar()">
+        Tentar novamente
+      </button>
+    </div>
+
+    <div *ngIf="carregando" class="text-center py-5">
+      <div class="spinner-border text-success"></div>
+      <p class="text-muted mt-2">Carregando descartes...</p>
+    </div>
+
+    <div class="table-responsive" *ngIf="!carregando">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Equipamento</th>
+            <th>Categoria</th>
+            <th>Quantidade</th>
+            <th>Ponto de coleta</th>
+            <th>Responsável</th>
+            <th>Certificado</th>
+            <th class="text-end">Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let descarte of descartesFiltrados">
+            <td>#{{ descarte.id }}</td>
+            <td>{{ descarte.data_descarte }}</td>
+            <td class="fw-medium">
+              {{ descarte.descricao_equipamento }}
+            </td>
+            <td>{{ descarte.categoria.nome }}</td>
+            <td>
+              {{ descarte.quantidade }}
+              {{ descarte.unidade_medida }}
+            </td>
+            <td>{{ descarte.ponto_coleta.nome }}</td>
+            <td>{{ descarte.responsavel.nome }}</td>
+            <td>
+              <span class="badge"
+                    [ngClass]="{
+                      'text-bg-success':
+                        descarte.status_certificado.toLowerCase().includes('emitido'),
+                      'text-bg-warning':
+                        descarte.status_certificado.toLowerCase().includes('pendente'),
+                      'text-bg-secondary':
+                        !descarte.status_certificado.toLowerCase().includes('emitido')
+                        && !descarte.status_certificado.toLowerCase().includes('pendente')
+                    }">
+                {{ descarte.status_certificado }}
+              </span>
+            </td>
+            <td class="text-end text-nowrap">
+              <button class="btn btn-sm btn-outline-secondary me-1"
+                      title="Visualizar"
+                      (click)="visualizar(viewModal, descarte)">
+                <i class="bi bi-eye"></i>
+              </button>
+
+              <button class="btn btn-sm btn-outline-primary me-1"
+                      title="Editar"
+                      (click)="abrirEdicao(formModal, descarte)">
+                <i class="bi bi-pencil"></i>
+              </button>
+
+              <button class="btn btn-sm btn-outline-danger"
+                      title="Excluir"
+                      (click)="confirmarExclusao(deleteModal, descarte)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="descartesFiltrados.length === 0">
+            <td colspan="9" class="text-center text-muted py-5">
+              <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+              Nenhum descarte encontrado.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de cadastro e edição -->
+<ng-template #formModal let-modal>
+  <div class="modal-header">
+    <div>
+      <h5 class="modal-title">
+        {{ modo === 'criar' ? 'Novo descarte' : 'Editar descarte' }}
+      </h5>
+      <small class="text-muted">
+        Preencha os dados do equipamento e do descarte.
+      </small>
+    </div>
+    <button type="button" class="btn-close"
+            (click)="modal.dismiss()"
+            [disabled]="salvando"></button>
+  </div>
+
+  <form #descarteForm="ngForm" (ngSubmit)="salvar(modal)">
+    <div class="modal-body">
+      <div *ngIf="erro" class="alert alert-danger">
+        <i class="bi bi-exclamation-circle me-2"></i>{{ erro }}
+      </div>
+
+      <h6 class="form-section-title">
+        <i class="bi bi-box-seam me-2"></i>
+        Dados do equipamento
+      </h6>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label for="dataDescarte" class="form-label">
+            Data do descarte *
+          </label>
+          <input
+            id="dataDescarte"
+            name="data_descarte"
+            type="date"
+            class="form-control"
+            [(ngModel)]="form.data_descarte"
+            [max]="dataMaxima"
+            required
+            [disabled]="salvando"
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label for="quantidadeDescarte" class="form-label">
+            Quantidade *
+          </label>
+          <input
+            id="quantidadeDescarte"
+            name="quantidade"
+            type="number"
+            class="form-control"
+            [(ngModel)]="form.quantidade"
+            min="0.01"
+            step="any"
+            required
+            [disabled]="salvando"
+          />
+        </div>
+
+        <div class="col-12">
+          <label for="descricaoEquipamento" class="form-label">
+            Descrição do equipamento *
+          </label>
+          <input
+            id="descricaoEquipamento"
+            name="descricao_equipamento"
+            type="text"
+            class="form-control"
+            [(ngModel)]="form.descricao_equipamento"
+            maxlength="200"
+            required
+            [disabled]="salvando"
+            placeholder="Ex.: Monitor LCD de 24 polegadas"
+          />
+          <div class="form-text">Máximo de 200 caracteres.</div>
+        </div>
+
+        <div class="col-md-6">
+          <label for="unidadeMedida" class="form-label">
+            Unidade de medida *
+          </label>
+          <select
+            id="unidadeMedida"
+            name="unidade_medida"
+            class="form-select"
+            [(ngModel)]="form.unidade_medida"
+            required
+            [disabled]="salvando"
+          >
+            <option *ngFor="let unidade of unidades" [ngValue]="unidade">
+              {{ unidade }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label for="categoriaDescarte" class="form-label">
+            Categoria *
+          </label>
+          <select
+            id="categoriaDescarte"
+            name="categoria_id"
+            class="form-select"
+            [(ngModel)]="form.categoria_id"
+            required
+            [disabled]="salvando || carregandoAuxiliares"
+          >
+            <option [ngValue]="0" disabled>Selecione uma categoria</option>
+            <option *ngFor="let categoria of categorias"
+                    [ngValue]="categoria.id">
+              {{ categoria.nome }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <h6 class="form-section-title">
+        <i class="bi bi-geo-alt me-2"></i>
+        Destino e responsável
+      </h6>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label for="pontoDescarte" class="form-label">
+            Ponto de coleta *
+          </label>
+          <select
+            id="pontoDescarte"
+            name="ponto_coleta_id"
+            class="form-select"
+            [(ngModel)]="form.ponto_coleta_id"
+            required
+            [disabled]="salvando || carregandoAuxiliares"
+          >
+            <option [ngValue]="0" disabled>Selecione um ponto</option>
+            <option *ngFor="let ponto of pontos" [ngValue]="ponto.id">
+              {{ ponto.nome }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label for="responsavelDescarte" class="form-label">
+            Responsável *
+          </label>
+          <select
+            id="responsavelDescarte"
+            name="responsavel_id"
+            class="form-select"
+            [(ngModel)]="form.responsavel_id"
+            required
+            [disabled]="salvando || carregandoAuxiliares"
+          >
+            <option [ngValue]="0" disabled>Selecione um responsável</option>
+            <option *ngFor="let responsavel of responsaveis"
+                    [ngValue]="responsavel.id">
+              {{ responsavel.nome }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <h6 class="form-section-title">
+        <i class="bi bi-patch-check me-2"></i>
+        Certificado e observações
+      </h6>
+
+      <div class="row g-3">
+        <div class="col-12">
+          <label for="statusCertificado" class="form-label">
+            Status do certificado *
+          </label>
+          <select
+            id="statusCertificado"
+            name="status_certificado"
+            class="form-select"
+            [(ngModel)]="form.status_certificado"
+            required
+            [disabled]="salvando"
+          >
+            <option *ngFor="let status of statusCertificado"
+                    [ngValue]="status">
+              {{ status }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-12">
+          <label for="observacoesDescarte" class="form-label">
+            Observações
+          </label>
+          <textarea
+            id="observacoesDescarte"
+            name="observacoes"
+            class="form-control"
+            rows="3"
+            [(ngModel)]="form.observacoes"
+            [disabled]="salvando"
+            placeholder="Informações adicionais sobre o descarte..."
+          ></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light"
+              (click)="modal.dismiss()"
+              [disabled]="salvando">
+        Cancelar
+      </button>
+
+      <button type="submit" class="btn btn-success"
+              [disabled]="salvando || carregandoAuxiliares ||
+                          !descarteForm.valid">
+        <span *ngIf="salvando"
+              class="spinner-border spinner-border-sm me-2"></span>
+        <i *ngIf="!salvando" class="bi bi-check-lg me-1"></i>
+        {{ salvando ? 'Salvando...' : 'Salvar descarte' }}
+      </button>
+    </div>
+  </form>
+</ng-template>
+
+<!-- Modal de visualização -->
+<ng-template #viewModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Detalhes do descarte</h5>
+    <button class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+
+  <div class="modal-body" *ngIf="selecionado">
+    <div class="detail-grid">
+      <div class="detail-item">
+        <small>Código</small>
+        <p>#{{ selecionado.id }}</p>
+      </div>
+      <div class="detail-item">
+        <small>Data do descarte</small>
+        <p>{{ selecionado.data_descarte }}</p>
+      </div>
+      <div class="detail-item full-width">
+        <small>Equipamento</small>
+        <p>{{ selecionado.descricao_equipamento }}</p>
+      </div>
+      <div class="detail-item">
+        <small>Categoria</small>
+        <p>{{ selecionado.categoria.nome }}</p>
+      </div>
+      <div class="detail-item">
+        <small>Quantidade</small>
+        <p>{{ selecionado.quantidade }} {{ selecionado.unidade_medida }}</p>
+      </div>
+      <div class="detail-item">
+        <small>Ponto de coleta</small>
+        <p>{{ selecionado.ponto_coleta.nome }}</p>
+        <small>{{ selecionado.ponto_coleta.endereco || 'Endereço não informado' }}</small>
+      </div>
+      <div class="detail-item">
+        <small>Responsável</small>
+        <p>{{ selecionado.responsavel.nome }}</p>
+        <small>{{ selecionado.responsavel.email || 'E-mail não informado' }}</small>
+      </div>
+      <div class="detail-item">
+        <small>Status do certificado</small>
+        <p>{{ selecionado.status_certificado }}</p>
+      </div>
+      <div class="detail-item full-width">
+        <small>Observações</small>
+        <p class="preserve-lines">
+          {{ selecionado.observacoes || 'Nenhuma observação informada.' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modal.close()">Fechar</button>
+    <button class="btn btn-primary"
+            *ngIf="selecionado"
+            (click)="modal.close(); abrirEdicao(formModal, selecionado!)">
+      <i class="bi bi-pencil me-1"></i> Editar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal de exclusão -->
+<ng-template #deleteModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Excluir descarte</h5>
+    <button class="btn-close" (click)="modal.dismiss()"
+            [disabled]="excluindo"></button>
+  </div>
+
+  <div class="modal-body" *ngIf="selecionado">
+    <div class="text-center py-2">
+      <i class="bi bi-exclamation-triangle text-danger fs-1"></i>
+      <p class="mt-3 mb-1">Deseja realmente excluir este descarte?</p>
+      <strong>{{ selecionado.descricao_equipamento }}</strong>
+      <p class="text-muted small mt-2">
+        Esta ação não poderá ser desfeita.
+      </p>
+    </div>
+
+    <div *ngIf="erro" class="alert alert-danger">{{ erro }}</div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-light" (click)="modal.dismiss()"
+            [disabled]="excluindo">Cancelar</button>
+    <button class="btn btn-danger" (click)="excluir(modal)"
+            [disabled]="excluindo">
+      <span *ngIf="excluindo"
+            class="spinner-border spinner-border-sm me-2"></span>
+      {{ excluindo ? 'Excluindo...' : 'Excluir descarte' }}
+    </button>
+  </div>
+</ng-template>

@@ -1,0 +1,275 @@
+.dashboard-page {
+  padding-bottom: 32px;
+}
+
+.page-header h2 {
+  color: #173f35;
+  font-weight: 700;
+}
+
+.page-header p {
+  font-size: 0.95rem;
+}
+
+.metric-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 100%;
+  min-height: 145px;
+  padding: 22px;
+  background: #fff;
+  border: 1px solid #e8eee9;
+  border-radius: 14px;
+  box-shadow: 0 3px 12px rgb(24 60 43 / 4%);
+}
+
+.metric-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  font-size: 1.5rem;
+}
+
+.icon-green {
+  color: #26734d;
+  background: #e6f4eb;
+}
+
+.icon-blue {
+  color: #2866a6;
+  background: #e8f1fb;
+}
+
+.icon-purple {
+  color: #7754a6;
+  background: #f0eafb;
+}
+
+.icon-orange {
+  color: #b86a1b;
+  background: #fff0df;
+}
+
+.metric-label {
+  color: #718078;
+  font-size: 0.83rem;
+  margin: 0 0 5px;
+}
+
+.metric-card h3 {
+  color: #243a30;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.metric-card small {
+  color: #89958e;
+  font-size: 0.78rem;
+}
+
+.dashboard-card {
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #e8eee9;
+  border-radius: 14px;
+  box-shadow: 0 3px 12px rgb(24 60 43 / 4%);
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.section-header h5 {
+  color: #234638;
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.section-header p {
+  color: #87928b;
+  font-size: 0.83rem;
+  margin: 0;
+}
+
+.section-header > i {
+  color: #478566;
+  font-size: 1.35rem;
+}
+
+.chart-item,
+.status-item {
+  margin-bottom: 23px;
+}
+
+.chart-item:last-child,
+.status-item:last-child {
+  margin-bottom: 0;
+}
+
+.chart-label {
+  color: #43534a;
+  font-size: 0.9rem;
+}
+
+.chart-progress {
+  height: 8px;
+  overflow: hidden;
+  background: #edf2ee;
+  border-radius: 20px;
+}
+
+.category-bar {
+  background: #398761;
+  border-radius: 20px;
+  transition: width 0.35s ease;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.dot-warning {
+  background: #e3a52f;
+}
+
+.dot-info {
+  background: #399bc4;
+}
+
+.dot-success {
+  background: #329565;
+}
+
+.status-bar-warning {
+  background: #e3a52f;
+}
+
+.status-bar-info {
+  background: #399bc4;
+}
+
+.status-bar-success {
+  background: #329565;
+}
+
+.certificate-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px;
+  background: #f6f9f7;
+  border-radius: 10px;
+}
+
+.certificate-summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-number {
+  color: #374b40;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.summary-label {
+  color: #7a8980;
+  font-size: 0.78rem;
+}
+
+.dashboard-table {
+  margin-bottom: 0;
+}
+
+.dashboard-table th {
+  padding: 12px;
+  color: #738078;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border-bottom-color: #e9efeb;
+}
+
+.dashboard-table td {
+  padding: 15px 12px;
+  border-bottom-color: #edf1ee;
+}
+
+.dashboard-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.point-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  color: #327c59;
+  background: #e9f4ed;
+  border-radius: 9px;
+}
+
+.quantity-badge {
+  display: inline-block;
+  min-width: 34px;
+  padding: 5px 9px;
+  color: #286c4a;
+  background: #eaf5ee;
+  font-weight: 600;
+  text-align: center;
+  border-radius: 7px;
+}
+
+.empty-state {
+  padding: 24px 12px;
+  color: #849087;
+  font-size: 0.9rem;
+  text-align: center;
+  background: #f8faf8;
+  border-radius: 8px;
+}
+
+.loading-state {
+  min-height: 280px;
+}
+
+@media (max-width: 576px) {
+  .metric-card {
+    min-height: 120px;
+    padding: 16px;
+  }
+
+  .metric-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 1.25rem;
+  }
+
+  .metric-card h3 {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-card {
+    padding: 18px;
+  }
+
+  .certificate-summary {
+    padding: 14px;
+  }
+}

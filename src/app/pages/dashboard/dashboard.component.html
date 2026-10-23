@@ -1,0 +1,243 @@
+<div class="dashboard-page">
+
+  <div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1">Dashboard</h2>
+      <p class="text-muted mb-0">
+        Visão geral dos descartes eletrônicos e certificados.
+      </p>
+    </div>
+
+    <button
+      class="btn btn-outline-success"
+      type="button"
+      (click)="carregarDashboard()"
+      [disabled]="carregando">
+      <i class="bi bi-arrow-clockwise me-2"></i>
+      Atualizar
+    </button>
+  </div>
+
+  <div *ngIf="erro" class="alert alert-warning" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    {{ erro }}
+    <button
+      type="button"
+      class="btn btn-sm btn-outline-dark ms-2"
+      (click)="carregarDashboard()">
+      Tentar novamente
+    </button>
+  </div>
+
+  <div *ngIf="carregando" class="loading-state text-center py-5">
+    <div class="spinner-border text-success" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="text-muted mt-3 mb-0">Carregando indicadores...</p>
+  </div>
+
+  <ng-container *ngIf="!carregando">
+
+    <!-- Indicadores principais -->
+    <div class="row g-3 mb-4">
+
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="metric-card">
+          <div class="metric-icon icon-green">
+            <i class="bi bi-recycle"></i>
+          </div>
+          <div>
+            <p class="metric-label">Total de descartes</p>
+            <h3>{{ totalDescartes }}</h3>
+            <small>Registros cadastrados</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="metric-card">
+          <div class="metric-icon icon-blue">
+            <i class="bi bi-tags"></i>
+          </div>
+          <div>
+            <p class="metric-label">Categorias</p>
+            <h3>{{ categorias.length }}</h3>
+            <small>Tipos cadastrados</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="metric-card">
+          <div class="metric-icon icon-purple">
+            <i class="bi bi-geo-alt"></i>
+          </div>
+          <div>
+            <p class="metric-label">Pontos de coleta</p>
+            <h3>{{ totalPontos }}</h3>
+            <small>Locais cadastrados</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="metric-card">
+          <div class="metric-icon icon-orange">
+            <i class="bi bi-file-earmark-check"></i>
+          </div>
+          <div>
+            <p class="metric-label">Certificados emitidos</p>
+            <h3>{{ totalCertificadosEmitidos }}</h3>
+            <small>{{ percentualCertificadosEmitidos }}% dos descartes</small>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Gráficos e distribuição -->
+    <div class="row g-4 mb-4">
+
+      <div class="col-12 col-xl-6">
+        <div class="dashboard-card h-100">
+          <div class="section-header">
+            <div>
+              <h5>Descartes por categoria</h5>
+              <p>Quantidade de registros por tipo de equipamento</p>
+            </div>
+            <i class="bi bi-bar-chart-line"></i>
+          </div>
+
+          <div *ngIf="descartesPorCategoria.length === 0"
+               class="empty-state">
+            Nenhuma categoria cadastrada.
+          </div>
+
+          <div *ngFor="let item of descartesPorCategoria"
+               class="chart-item">
+            <div class="d-flex justify-content-between gap-3 mb-2">
+              <span class="chart-label">{{ item.nome }}</span>
+              <strong>{{ item.quantidade }}</strong>
+            </div>
+
+            <div class="progress chart-progress">
+              <div
+                class="progress-bar category-bar"
+                role="progressbar"
+                [style.width.%]="item.percentual"
+                [attr.aria-valuenow]="item.quantidade"
+                aria-valuemin="0"
+                [attr.aria-valuemax]="totalDescartes">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-xl-6">
+        <div class="dashboard-card h-100">
+          <div class="section-header">
+            <div>
+              <h5>Situação dos certificados</h5>
+              <p>Acompanhamento dos processos de certificação</p>
+            </div>
+            <i class="bi bi-patch-check"></i>
+          </div>
+
+          <div *ngFor="let item of certificados" class="status-item">
+            <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
+              <div class="d-flex align-items-center gap-2">
+                <span class="status-dot" [ngClass]="'dot-' + item.cor"></span>
+                <span class="chart-label">{{ item.nome }}</span>
+              </div>
+              <strong>{{ item.quantidade }}</strong>
+            </div>
+
+            <div class="progress chart-progress">
+              <div
+                class="progress-bar"
+                [ngClass]="'status-bar-' + item.cor"
+                role="progressbar"
+                [style.width.%]="item.percentual"
+                [attr.aria-valuenow]="item.quantidade"
+                aria-valuemin="0"
+                [attr.aria-valuemax]="totalDescartes">
+              </div>
+            </div>
+          </div>
+
+          <div class="certificate-summary mt-4">
+            <div>
+              <span class="summary-number">{{ totalCertificadosPendentes }}</span>
+              <span class="summary-label">Aguardando conclusão</span>
+            </div>
+            <div class="text-end">
+              <span class="summary-number text-success">
+                {{ percentualCertificadosEmitidos }}%
+              </span>
+              <span class="summary-label">Concluídos</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Pontos de coleta -->
+    <div class="dashboard-card">
+      <div class="section-header">
+        <div>
+          <h5>Movimentação por ponto de coleta</h5>
+          <p>Quantidade de descartes associados a cada local</p>
+        </div>
+        <i class="bi bi-geo-alt"></i>
+      </div>
+
+      <div *ngIf="descartesPorPonto.length === 0" class="empty-state">
+        Nenhum ponto de coleta cadastrado.
+      </div>
+
+      <div *ngIf="descartesPorPonto.length > 0" class="table-responsive">
+        <table class="table align-middle dashboard-table">
+          <thead>
+            <tr>
+              <th>Ponto de coleta</th>
+              <th>Descartes registrados</th>
+              <th style="min-width: 180px;">Participação relativa</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of descartesPorPonto">
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="point-icon">
+                    <i class="bi bi-geo"></i>
+                  </span>
+                  <span class="fw-semibold">{{ item.nome }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="quantity-badge">{{ item.quantidade }}</span>
+              </td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="progress flex-grow-1 chart-progress">
+                    <div
+                      class="progress-bar category-bar"
+                      role="progressbar"
+                      [style.width.%]="item.percentual">
+                    </div>
+                  </div>
+                  <small class="text-muted">
+                    {{ item.percentual | number:'1.0-0' }}%
+                  </small>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

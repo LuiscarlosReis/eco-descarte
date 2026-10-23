@@ -1,0 +1,156 @@
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="mb-1">Responsáveis</h2>
+    <p class="text-muted mb-0">Gerencie os responsáveis pelos descartes.</p>
+  </div>
+  <button class="btn btn-success" (click)="abrirCadastro(formModal)">
+    <i class="bi bi-plus-lg me-2"></i> Novo responsável
+  </button>
+</div>
+
+<div *ngIf="mensagem" class="alert alert-success alert-dismissible">
+  {{ mensagem }}
+  <button class="btn-close" (click)="mensagem = ''"></button>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <div class="row mb-4 align-items-end">
+      <div class="col-md-6">
+        <label for="pesquisaResponsavel" class="form-label">Pesquisar</label>
+        <input id="pesquisaResponsavel" class="form-control"
+               [(ngModel)]="pesquisa"
+               placeholder="Nome ou e-mail do responsável..." />
+      </div>
+      <div class="col-md-6 text-md-end mt-3">
+        <span class="text-muted">{{ filtrados.length }} registro(s)</span>
+      </div>
+    </div>
+
+    <div *ngIf="erro && !carregando" class="alert alert-danger">
+      {{ erro }}
+      <button class="btn btn-sm btn-outline-danger ms-2" (click)="listar()">
+        Tentar novamente
+      </button>
+    </div>
+
+    <div *ngIf="carregando" class="text-center py-5">
+      <div class="spinner-border text-success"></div>
+    </div>
+
+    <div class="table-responsive" *ngIf="!carregando">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th class="text-end">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let responsavel of filtrados">
+            <td>#{{ responsavel.id }}</td>
+            <td class="fw-medium">{{ responsavel.nome }}</td>
+            <td>{{ responsavel.email || 'Não informado' }}</td>
+            <td class="text-end text-nowrap">
+              <button class="btn btn-sm btn-outline-secondary me-1"
+                      title="Visualizar"
+                      (click)="visualizar(viewModal, responsavel)">
+                <i class="bi bi-eye"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-primary me-1"
+                      title="Editar"
+                      (click)="abrirEdicao(formModal, responsavel)">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger"
+                      title="Excluir"
+                      (click)="confirmarExclusao(deleteModal, responsavel)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="filtrados.length === 0">
+            <td colspan="4" class="text-center text-muted py-5">
+              Nenhum responsável encontrado.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<ng-template #formModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">
+      {{ modo === 'criar' ? 'Novo responsável' : 'Editar responsável' }}
+    </h5>
+    <button class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+
+  <form (ngSubmit)="salvar(modal)">
+    <div class="modal-body">
+      <div *ngIf="erro" class="alert alert-danger">{{ erro }}</div>
+
+      <div class="mb-3">
+        <label for="nomeResponsavel" class="form-label">Nome *</label>
+        <input id="nomeResponsavel" name="nome" class="form-control"
+               [(ngModel)]="nome" required maxlength="100"
+               [disabled]="salvando"
+               placeholder="Nome completo" />
+      </div>
+
+      <div>
+        <label for="emailResponsavel" class="form-label">E-mail</label>
+        <input id="emailResponsavel" name="email" type="email"
+               class="form-control" [(ngModel)]="email"
+               maxlength="150" [disabled]="salvando"
+               placeholder="exemplo@email.com" />
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light"
+              (click)="modal.dismiss()" [disabled]="salvando">Cancelar</button>
+      <button type="submit" class="btn btn-success"
+              [disabled]="salvando || !nome.trim()">
+        {{ salvando ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </form>
+</ng-template>
+
+<ng-template #viewModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Detalhes do responsável</h5>
+    <button class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body" *ngIf="selecionado">
+    <p><small class="text-muted">Código</small><br />#{{ selecionado.id }}</p>
+    <p><small class="text-muted">Nome</small><br /><strong>{{ selecionado.nome }}</strong></p>
+    <p><small class="text-muted">E-mail</small><br />{{ selecionado.email || 'Não informado' }}</p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modal.close()">Fechar</button>
+  </div>
+</ng-template>
+
+<ng-template #deleteModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Excluir responsável</h5>
+    <button class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body" *ngIf="selecionado">
+    <p>Deseja realmente excluir o responsável <strong>{{ selecionado.nome }}</strong>?</p>
+    <p class="small text-muted">A exclusão poderá falhar se houver descartes associados.</p>
+    <div *ngIf="erro" class="alert alert-danger">{{ erro }}</div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-light" (click)="modal.dismiss()">Cancelar</button>
+    <button class="btn btn-danger" (click)="excluir(modal)">
+      <i class="bi bi-trash me-1"></i> Excluir
+    </button>
+  </div>
+</ng-template>

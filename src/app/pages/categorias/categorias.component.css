@@ -1,0 +1,37 @@
+.page-header h2 {
+  color: #173f35;
+  font-weight: 700;
+}
+
+.card {
+  border-radius: 12px;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table th {
+  font-size: 0.85rem;
+  color: #53645c;
+  white-space: nowrap;
+  padding: 14px 12px;
+}
+
+.table td {
+  padding: 14px 12px;
+}
+
+.detail-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #edf0ee;
+}
+
+.detail-item:last-child {
+  border-bottom: 0;
+}
+
+.detail-item p {
+  margin: 5px 0 0;
+  font-weight: 500;
+}

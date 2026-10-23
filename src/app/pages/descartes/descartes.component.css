@@ -1,0 +1,112 @@
+
+.page-header h2 {
+  color: #173f35;
+  font-weight: 700;
+}
+
+.page-header p {
+  font-size: 0.95rem;
+}
+
+.card {
+  border-radius: 12px;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table th {
+  padding: 14px 12px;
+  color: #53645c;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 14px 12px;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.form-section-title {
+  color: #24604d;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #e5ece7;
+}
+
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374940;
+}
+
+.form-control,
+.form-select,
+.input-group-text {
+  border-color: #dce5df;
+  border-radius: 7px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #5ba888;
+  box-shadow: 0 0 0 0.2rem rgb(40 125 87 / 12%);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 20px;
+}
+
+.detail-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #edf0ee;
+  min-width: 0;
+}
+
+.detail-item small {
+  color: #738078;
+  overflow-wrap: anywhere;
+}
+
+.detail-item p {
+  margin: 5px 0 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.preserve-lines {
+  white-space: pre-line;
+}
+
+.badge {
+  font-weight: 500;
+  padding: 7px 9px;
+}
+
+@media (max-width: 576px) {
+  .page-header {
+    align-items: flex-start !important;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-item.full-width {
+    grid-column: auto;
+  }
+}
